@@ -47,7 +47,12 @@ new RGBELoader().load('/textures/kloppenheim_06_puresky_1k.hdr', (skyTexture) =>
   skyTexture.mapping = THREE.EquirectangularReflectionMapping
   scene.background = skyTexture
   scene.environment = skyTexture
+  // 背景として直接目に映る明るさだけを抑える(宝石の環境反射には影響しない)
+  scene.backgroundIntensity = 0.5
 })
+
+// 遠くをうっすら霞ませて奥行きを出す(台座や宝石には影響しない距離に設定)
+scene.fog = new THREE.Fog(0xd8e3ee, 24, 60)
 
 const floorTexture = textureLoader.load('/textures/marble_01_diff_1k.jpg')
 floorTexture.colorSpace = THREE.SRGBColorSpace
@@ -123,7 +128,7 @@ const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
   0.55,
   0.4,
-  0.85,
+  1.0,
 )
 composer.addPass(bloomPass)
 
@@ -381,7 +386,7 @@ const toggleLevitate = (gem) => {
     ease: 'power2.inOut',
   })
   gsap.to(gem, {
-    baseIntensity: gem.raised ? 2.6 : 1.4,
+    baseIntensity: gem.raised ? 1.9 : 1.4,
     duration: 0.9,
     ease: 'power2.inOut',
   })
@@ -409,6 +414,13 @@ for (let i = 0; i < particleCount; i += 1) {
 
 particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3))
 particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3))
+
+// 各粒子の基準位置と揺れの位相(漂う動きに使う)
+const particleBasePositions = particlePositions.slice()
+const particlePhases = new Float32Array(particleCount)
+for (let i = 0; i < particleCount; i += 1) {
+  particlePhases[i] = Math.random() * Math.PI * 2
+}
 
 const particles = new THREE.Points(
   particleGeometry,
@@ -443,6 +455,17 @@ function animate() {
   })
 
   particles.rotation.y = elapsed * 0.015
+
+  // 各粒子を基準位置から緩やかに漂わせ、空気の流れ感を出す
+  const positionsArray = particleGeometry.attributes.position.array
+  for (let i = 0; i < particleCount; i += 1) {
+    const i3 = i * 3
+    const phase = particlePhases[i]
+    positionsArray[i3] = particleBasePositions[i3] + Math.sin(elapsed * 0.4 + phase) * 0.4
+    positionsArray[i3 + 1] = particleBasePositions[i3 + 1] + Math.sin(elapsed * 0.3 + phase * 1.3) * 0.3
+    positionsArray[i3 + 2] = particleBasePositions[i3 + 2] + Math.cos(elapsed * 0.4 + phase) * 0.4
+  }
+  particleGeometry.attributes.position.needsUpdate = true
 
   composer.render()
 }
