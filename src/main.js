@@ -232,6 +232,29 @@ const fitModelAtOrigin = (model, targetSize) => {
   model.position.y -= box.min.y
 }
 
+// GLBの元マテリアルを、透過(transmission)とクリアコートを持つ宝石らしい質感に差し替える
+const applyGemMaterial = (model, color) => {
+  const buildMaterial = () =>
+    new THREE.MeshPhysicalMaterial({
+      color,
+      metalness: 0,
+      roughness: 0.08,
+      transmission: 0.92,
+      thickness: 0.6,
+      ior: 1.8,
+      clearcoat: 0.6,
+      clearcoatRoughness: 0.15,
+      envMapIntensity: 1.2,
+    })
+
+  model.traverse((child) => {
+    if (!child.isMesh) return
+    child.material = Array.isArray(child.material)
+      ? child.material.map(buildMaterial)
+      : buildMaterial()
+  })
+}
+
 const registerPickTargets = (root) => {
   root.traverse((child) => {
     if (!child.isMesh) return
@@ -289,10 +312,16 @@ gemDefs.forEach((def, index) => {
   const x = Math.cos(angle) * arrangementRadius
   const z = Math.sin(angle) * arrangementRadius
 
-  // 台座
+  // 台座(表面に薄いクリアコートを乗せて艶を出す)
   const pedestal = new THREE.Mesh(
     new THREE.CylinderGeometry(0.55, 0.65, pedestalHeight, 24),
-    new THREE.MeshStandardMaterial({ color: 0x4a4552, roughness: 0.6, metalness: 0.2 }),
+    new THREE.MeshPhysicalMaterial({
+      color: 0x4a4552,
+      roughness: 0.6,
+      metalness: 0.2,
+      clearcoat: 0.25,
+      clearcoatRoughness: 0.35,
+    }),
   )
   pedestal.position.set(x, pedestalHeight / 2, z)
   pedestal.castShadow = true
@@ -324,6 +353,7 @@ gemDefs.forEach((def, index) => {
       model.userData.gem = gem
       gem.model = model
 
+      applyGemMaterial(model, def.color)
       scene.add(model)
       registerPickTargets(model)
       revealModel(model, 0.2 + index * 0.18)
