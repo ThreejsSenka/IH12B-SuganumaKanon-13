@@ -246,11 +246,14 @@ const revealModel = (model, delay) => {
   model.position.y -= 0.8
   model.scale.setScalar(0.001)
 
+  // フェード対象のマテリアルを重複なく集めておく(同一マテリアルを複数メッシュが共有していても二重にアニメーションしないため)
+  const materials = new Set()
   model.traverse((child) => {
     if (!child.isMesh) return
     getMaterials(child).forEach((material) => {
       material.transparent = true
       material.opacity = 0
+      materials.add(material)
     })
   })
 
@@ -261,22 +264,11 @@ const revealModel = (model, delay) => {
     { x: targetScale.x, y: targetScale.y, z: targetScale.z, duration: 1, ease: 'back.out(1.6)' },
     '<',
   )
-  timeline.to(
-    model,
-    {
-      duration: 0.9,
-      ease: 'power2.out',
-      onUpdate: () => {
-        model.traverse((child) => {
-          if (!child.isMesh) return
-          getMaterials(child).forEach((material) => {
-            material.opacity = timeline.progress()
-          })
-        })
-      },
-    },
-    '<',
-  )
+  // マテリアルごとに直接opacityをアニメーションする(timeline.progress()を代入する書き方だと、
+  // このトゥイーンより長い他のトゥイーンがある場合に1へ到達しないまま止まってしまうため使わない)
+  materials.forEach((material) => {
+    timeline.to(material, { opacity: 1, duration: 0.9, ease: 'power2.out' }, '<')
+  })
 }
 
 // 展示する4つの宝石(すべてQuaternius氏によるCC0/パブリックドメインの3Dモデル)
