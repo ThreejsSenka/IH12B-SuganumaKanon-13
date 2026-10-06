@@ -1,0 +1,546 @@
+/* レイアウト: 1画面目は3Dの展示室(クリックで寄る)、その下は普通にスクロールする紹介ページ */
+:root {
+  --paper: #eef2f7;
+  --ink: #16213a;
+  --ink-muted: #56637a;
+  --line: rgba(22, 33, 58, 0.14);
+  --glass: rgba(14, 22, 40, 0.74);
+  --glass-strong: rgba(12, 19, 35, 0.88);
+  --glass-edge: rgba(255, 255, 255, 0.16);
+  --on-glass: #f1f4fa;
+  --on-glass-muted: #b3c0d4;
+  --gold: #ffd98a;
+  --gold-deep: #8a5d0c;
+  --font-display: 'Shippori Mincho B1', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  --font-body: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  --font-data: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --gutter: clamp(16px, 4vw, 48px);
+  --content: 68rem;
+  --header-h: 60px;
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-h);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+.facet {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  transform: rotate(45deg);
+  background: var(--hue, var(--gold));
+  box-shadow: 0 0 10px var(--hue, var(--gold));
+}
+
+/* 宝石の名前は、石ごとの雰囲気に合わせた書体にする */
+[data-gem-id='blue'] {
+  --gem-font: 'Zen Old Mincho', var(--font-display);
+  --gem-weight: 600;
+}
+
+[data-gem-id='green'] {
+  --gem-font: 'Zen Maru Gothic', var(--font-body);
+  --gem-weight: 500;
+}
+
+[data-gem-id='pink'] {
+  --gem-font: 'Kaisei Decol', var(--font-display);
+  --gem-weight: 500;
+}
+
+[data-gem-id='crystal'] {
+  --gem-font: 'Yuji Syuku', var(--font-display);
+  --gem-weight: 400;
+}
+
+.gem-name {
+  font-family: var(--gem-font, var(--font-display));
+  font-weight: var(--gem-weight, 700);
+}
+
+.reading {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* ヘッダー */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  min-height: var(--header-h);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 20px;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) var(--gutter) 10px;
+  background: var(--glass);
+  border-bottom: 1px solid var(--glass-edge);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--on-glass);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  color: inherit;
+  text-decoration: none;
+}
+
+.site-nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+.site-nav a {
+  color: var(--on-glass);
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  padding-block: 4px;
+  border-bottom: 1px solid transparent;
+}
+
+.site-nav a:hover {
+  border-bottom-color: var(--gold);
+}
+
+/* 1画面目: 3Dの展示室 */
+.hall {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  background: #cdd9e6;
+  color: var(--on-glass);
+}
+
+#scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hall-intro {
+  position: absolute;
+  left: var(--gutter);
+  top: calc(var(--header-h) + 28px);
+  max-width: min(26rem, calc(100% - 2 * var(--gutter)));
+  display: grid;
+  gap: 6px;
+  pointer-events: none;
+  text-shadow: 0 1px 14px rgba(10, 18, 34, 0.6);
+}
+
+.hall-intro h1 {
+  font-size: clamp(28px, 4.4vw, 40px);
+}
+
+.shelf {
+  position: absolute;
+  left: var(--gutter);
+  bottom: 24px;
+  display: grid;
+  gap: 10px;
+  max-width: calc(100% - 2 * var(--gutter));
+}
+
+.shelf ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass);
+  color: var(--on-glass);
+  font-size: 14px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.chip:hover,
+.chip[aria-pressed='true'] {
+  border-color: var(--hue);
+  background: var(--glass-strong);
+}
+
+.scroll-cue {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--on-glass);
+  text-decoration: none;
+  text-shadow: 0 1px 10px rgba(10, 18, 34, 0.7);
+}
+
+.scroll-cue::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  animation: cue 1.8s ease-in-out infinite;
+}
+
+@keyframes cue {
+  50% {
+    transform: translateY(4px) rotate(45deg);
+  }
+}
+
+.panel {
+  position: absolute;
+  z-index: 3;
+  top: calc(var(--header-h) + 16px);
+  right: var(--gutter);
+  bottom: 24px;
+  width: min(24rem, calc(100% - 2 * var(--gutter)));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px 28px;
+  border-radius: 14px;
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow-y: auto;
+  transform: translateX(calc(100% + var(--gutter) + 8px));
+  transition: transform 0.55s cubic-bezier(0.22, 0.8, 0.26, 1);
+}
+
+.panel.is-open {
+  transform: translateX(0);
+}
+
+.panel-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.panel .eyebrow,
+.panel .reading,
+.panel .note {
+  color: var(--on-glass-muted);
+}
+
+.panel h2 {
+  font-size: clamp(26px, 3.4vw, 32px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.panel button {
+  font-size: 13px;
+  color: var(--on-glass);
+  background: transparent;
+  border: 1px solid var(--glass-edge);
+  border-radius: 999px;
+  padding: 6px 14px;
+}
+
+.panel button:hover {
+  border-color: var(--gold);
+}
+
+.panel-nav {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.panel-nav button {
+  flex: 1;
+}
+
+.specs {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.panel .specs {
+  border-top-color: var(--glass-edge);
+}
+
+.specs div {
+  display: grid;
+  gap: 2px;
+}
+
+.specs dt {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--ink-muted);
+}
+
+.panel .specs dt {
+  color: var(--on-glass-muted);
+}
+
+.specs dd {
+  margin: 0;
+  font-family: var(--font-data);
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  font-size: 12px;
+}
+
+/* 2画面目以降: 普通のページ部分 */
+.section {
+  padding-block: clamp(56px, 9vw, 104px);
+  padding-inline: var(--gutter);
+}
+
+.section-inner {
+  max-width: var(--content);
+  margin-inline: auto;
+  display: grid;
+  gap: 32px;
+}
+
+.section-head {
+  display: grid;
+  gap: 8px;
+  max-width: 40rem;
+}
+
+.section-head .eyebrow {
+  color: var(--gold-deep);
+}
+
+.section-head h2 {
+  font-size: clamp(26px, 3.6vw, 36px);
+}
+
+.section-head p {
+  color: var(--ink-muted);
+}
+
+.collection {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  gap: 20px;
+}
+
+.gem-card {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto auto;
+  gap: 12px;
+  padding: 0 0 22px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.gem-card > *:not(.gem-thumb) {
+  margin-inline: 22px;
+}
+
+/* この枠の位置に、上に重ねたキャンバスから回転する3Dの宝石が描かれる。
+   描画が始まるまでは宝石の色のぼかしを表示する */
+.gem-thumb {
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  background: radial-gradient(circle at 50% 55%, var(--hue) 0%, #c9d5e3 70%);
+}
+
+/* カードの3D表示用キャンバス。画面全体に重ね、クリックは下のページに通す */
+#card-views {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.gem-card .eyebrow {
+  color: var(--ink-muted);
+}
+
+.gem-card h3 {
+  font-size: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+}
+
+.gem-card .reading {
+  color: var(--ink-muted);
+}
+
+.gem-card p {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.view-button {
+  justify-self: start;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.view-button:hover {
+  background: transparent;
+  color: var(--ink);
+}
+
+.site-footer {
+  padding: 28px var(--gutter) calc(env(safe-area-inset-bottom, 0px) + 28px);
+  background: var(--ink);
+  color: var(--on-glass-muted);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.footer-inner {
+  max-width: var(--content);
+  margin-inline: auto;
+}
+
+@media (max-width: 719px) {
+  :root {
+    --header-h: 92px;
+  }
+
+  .hall-intro {
+    top: calc(var(--header-h) + 16px);
+  }
+
+  .scroll-cue {
+    display: none;
+  }
+
+  .panel {
+    top: auto;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    width: auto;
+    max-height: 58%;
+    padding: 20px;
+    transform: translateY(calc(100% + 40px));
+  }
+
+  .panel.is-open {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .panel {
+    transition: none;
+  }
+
+  .scroll-cue::after {
+    animation: none;
+  }
+}

@@ -4,10 +4,126 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sky Gem Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    />
+    <!-- 宝石の名前用のフォント。名前に使う文字だけを読み込む -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@600&family=Zen+Maru+Gothic:wght@500&family=Kaisei+Decol:wght@500&family=Yuji+Syuku&display=swap&text=%E7%A9%BA%E6%BE%84%E8%8B%A5%E8%91%89%E9%9B%AB%E6%A1%9C%E5%BD%B1%E5%A4%95%E7%B4%AB%E7%BE%A4%E6%99%B6"
+    />
   </head>
   <body>
-    <canvas id="c"></canvas>
-    <div id="hint">ドラッグ: 視点回転 / ホイール: ズーム / クリック: 宝石を選ぶ</div>
-    <script type="module" src="/src/main.js"></script>
+    <header class="site-header">
+      <a class="brand" href="#hall"><span class="facet"></span>Sky Gem Gallery</a>
+      <nav class="site-nav" aria-label="ページ内">
+        <ul>
+          <li><a href="#hall">展示室</a></li>
+          <li><a href="#collection">展示品</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <canvas id="card-views" aria-hidden="true"></canvas>
+
+    <main>
+      <section class="hall" id="hall" aria-label="展示室">
+        <canvas id="scene" aria-label="空中展示室の3Dビュー。ドラッグで見回し、宝石をクリックすると詳しく見られます"></canvas>
+
+        <div class="hall-intro">
+          <h1>空に浮かぶ、四つの石。</h1>
+        </div>
+
+        <div class="shelf">
+          <ul>
+            <li><button class="chip" type="button" data-gem="0" data-gem-id="blue" aria-pressed="false" style="--hue: #66c7ff"><span class="facet"></span><span class="gem-name">空澄</span></button></li>
+            <li><button class="chip" type="button" data-gem="1" data-gem-id="green" aria-pressed="false" style="--hue: #7be6a8"><span class="facet"></span><span class="gem-name">若葉雫</span></button></li>
+            <li><button class="chip" type="button" data-gem="2" data-gem-id="pink" aria-pressed="false" style="--hue: #ff9fe0"><span class="facet"></span><span class="gem-name">桜影</span></button></li>
+            <li><button class="chip" type="button" data-gem="3" data-gem-id="crystal" aria-pressed="false" style="--hue: #dcd0ff"><span class="facet"></span><span class="gem-name">夕紫群晶</span></button></li>
+          </ul>
+        </div>
+
+        <a class="scroll-cue" href="#collection">展示品の一覧へ</a>
+
+        <aside class="panel" id="panel" aria-labelledby="panel-name" inert>
+          <div class="panel-top">
+            <button type="button" id="panel-close">閉じる</button>
+          </div>
+          <h2 id="panel-name"><span class="gem-name">空澄</span><span class="reading">そらすみ</span></h2>
+          <p id="panel-text"></p>
+          <dl class="specs" id="panel-specs"></dl>
+          <div class="panel-nav">
+            <button type="button" id="panel-prev">前の石</button>
+            <button type="button" id="panel-next">次の石</button>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section" id="collection">
+        <div class="section-inner">
+          <div class="section-head">
+            <p class="eyebrow"><span class="facet"></span>展示品</p>
+            <h2>四つの標本</h2>
+            <p>展示台には、空の色をした四つの石が並んでいます。「展示室で見る」を押すと、上の展示室でその石に近づきます。</p>
+          </div>
+
+          <ul class="collection">
+            <li class="gem-card" data-gem-id="blue" style="--hue: #66c7ff">
+              <div class="gem-thumb" role="img" aria-label="空澄の3Dモデル"></div>
+              <h3><span class="gem-name">空澄</span><span class="reading">そらすみ</span></h3>
+              <p>晴れた日の高い空の青を、そのまま閉じ込めたような石。</p>
+              <dl class="specs">
+                <div><dt>硬度</dt><dd>9.0</dd></div>
+                <div><dt>屈折率</dt><dd>1.77</dd></div>
+                <div><dt>比重</dt><dd>4.00</dd></div>
+              </dl>
+              <button class="view-button" type="button" data-view="0">展示室で見る</button>
+            </li>
+            <li class="gem-card" data-gem-id="green" style="--hue: #7be6a8">
+              <div class="gem-thumb" role="img" aria-label="若葉雫の3Dモデル"></div>
+              <h3><span class="gem-name">若葉雫</span><span class="reading">わかばしずく</span></h3>
+              <p>雨上がりの若葉に残るしずくの緑。</p>
+              <dl class="specs">
+                <div><dt>硬度</dt><dd>7.5</dd></div>
+                <div><dt>屈折率</dt><dd>1.58</dd></div>
+                <div><dt>比重</dt><dd>2.72</dd></div>
+              </dl>
+              <button class="view-button" type="button" data-view="1">展示室で見る</button>
+            </li>
+            <li class="gem-card" data-gem-id="pink" style="--hue: #ff9fe0">
+              <div class="gem-thumb" role="img" aria-label="桜影の3Dモデル"></div>
+              <h3><span class="gem-name">桜影</span><span class="reading">さくらかげ</span></h3>
+              <p>花びらの影のような、やわらかい桃色。</p>
+              <dl class="specs">
+                <div><dt>硬度</dt><dd>7.0</dd></div>
+                <div><dt>屈折率</dt><dd>1.63</dd></div>
+                <div><dt>比重</dt><dd>3.06</dd></div>
+              </dl>
+              <button class="view-button" type="button" data-view="2">展示室で見る</button>
+            </li>
+            <li class="gem-card" data-gem-id="crystal" style="--hue: #dcd0ff">
+              <div class="gem-thumb" role="img" aria-label="夕紫群晶の3Dモデル"></div>
+              <h3><span class="gem-name">夕紫群晶</span><span class="reading">ゆうむらさきぐんしょう</span></h3>
+              <p>夕暮れの空の薄紫をまとった結晶の群れ。</p>
+              <dl class="specs">
+                <div><dt>硬度</dt><dd>7.0</dd></div>
+                <div><dt>屈折率</dt><dd>1.55</dd></div>
+                <div><dt>比重</dt><dd>2.65</dd></div>
+              </dl>
+              <button class="view-button" type="button" data-view="3">展示室で見る</button>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p class="footer-inner"><small>copyright © 2026 SuganumaKanon. All rights reserved.</small></p>
+    </footer>
+
+    <script type="module" src="/src/site/main.js"></script>
   </body>
 </html>
